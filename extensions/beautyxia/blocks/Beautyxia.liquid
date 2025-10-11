@@ -1,0 +1,1008 @@
+{{ 'style.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tips.js' | asset_url }}" defer></script>
+
+ {% comment %} Wrapped entire app in .my-app-container with dir="ltr" default  {% endcomment %}
+<div class="my-app-container" dir="ltr">
+  <div class="face-analysis-container">
+    <div class="face-analysis-card">
+      <div class="face-analysis-header">
+        <div class="header-content">
+          <div class="title-section">
+            <h2 class="face-analysis-title" data-translate="title">{{ block.settings.title }}</h2>
+            <p class="face-analysis-description" data-translate="description">{{ block.settings.description }}</p>
+          </div>
+          {% comment %} Added language selector in top right  {% endcomment %}
+          <div class="lang-selector">
+            <button class="lang-selector-btn active" data-lang="en" data-translate="lang_en">EN</button>
+            <button class="lang-selector-btn" data-lang="fr" data-translate="lang_fr">FR</button>
+            <button class="lang-selector-btn" data-lang="ar" data-translate="lang_ar">AR</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="face-analysis-body">
+        {% comment %} Image preview  {% endcomment %}
+        <div class="face-analysis-preview">
+          <div class="preview-placeholder" id="preview-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="face-icon">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="8" cy="10" r="1"/>
+              <circle cx="16" cy="10" r="1"/>
+              <path d="M8 16s1.5 2 4 2 4-2 4-2"/>
+            </svg>
+            <p data-translate="upload_placeholder">Upload or capture an image</p>
+          </div>
+          <img 
+            id="preview-image"
+            src="/placeholder.svg" 
+            alt="Uploaded Image Preview" 
+            width="256"
+            height="256" 
+            class="preview-image"
+            style="display: none;"
+          />
+        </div>
+
+        {% comment %} Webcam section  {% endcomment %}
+        <div id="webcam-section" class="webcam-section" style="display:none;">
+          <video id="webcam-video" width="256" height="256" autoplay playsinline></video>
+          <canvas id="webcam-canvas" width="256" height="256" style="display:none;"></canvas>
+        </div>
+
+        {% comment %} Upload section  {% endcomment %}
+        <div class="upload-section">
+          <input id="picture" type="file" class="hidden-file" accept="image/png, image/jpeg" />
+          <button type="button" class="upload-button" onclick="document.getElementById('picture').click()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-upload">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span data-translate="upload_button">Upload Image</span>
+          </button>
+
+          <button type="button" class="webcam-button" id="webcam-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span data-translate="use_camera">Use Camera</span>
+          </button>
+
+          <button type="button" class="capture-button" id="capture-btn" style="display:none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span data-translate="capture_photo">Capture Photo</span>
+          </button>
+
+          <button type="button" class="stop-camera-button" id="stop-camera-btn" style="display:none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            </svg>
+            <span data-translate="stop_camera">Stop Camera</span>
+          </button>
+
+          {% comment %} GDPR consent section  {% endcomment %}
+          <div class="gdpr-consent-section">
+            <div class="consent-checkbox">
+              <input type="checkbox" id="consent" required>
+              <label for="consent" data-translate="consent_text">I agree to the processing of my photo for temporary analysis to receive beauty tips and product recommendations. I understand that my photo will not be stored.</label>
+            </div>
+            <p class="privacy-policy-link">
+              <span data-translate="privacy_policy_text">Read our</span> 
+              <a href="https://beautyai.duckdns.org/privacy-policy/" target="_blank" data-translate="privacy_policy_link">Privacy Policy</a> 
+              <span data-translate="privacy_policy_details">for more details.</span>
+            </p>
+          </div>
+
+          <button class="analyze-button" disabled id="analyze-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 12l2 2 4-4"/>
+              <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+            </svg>
+            <span class="button-text" data-translate="analyze_face">Analyze Face</span>
+          </button>
+          <p class="upload-note" data-translate="upload_note">PNG, JPG, or JPEG up to 10MB</p>
+        </div>
+
+        {% comment %} Loading section  {% endcomment %}
+        <div id="loading-section" class="loading-section" style="display:none;">
+          <div class="loading-content">
+            <div class="loading-spinner">
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+              <div class="spinner-ring"></div>
+            </div>
+            <div class="loading-text">
+              <h3 data-translate="analyzing_title">Analyzing Your Face</h3>
+              <p data-translate="analyzing_subtitle">Please wait while we process your image...</p>
+            </div>
+          </div>
+        </div>
+
+        {% comment %} Results section  {% endcomment %}
+        <div id="results-section" class="results-section" style="display:none;">
+          <div class="results-header">
+            <div class="results-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 12l2 2 4-4"/>
+                <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+              </svg>
+            </div>
+            <h2 data-translate="analysis_complete">Analysis Complete</h2>
+            <p data-translate="analysis_results_subtitle">Here are your personalized skin analysis results</p>
+          </div>
+
+          <div class="analysis-results">
+            <div class="face-display">
+              <div class="face-frame">
+                <img id="analyzed-face" src="/placeholder.svg" alt="Analyzed Face" width="80" height="80">
+                <div class="face-badge">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="face-info">
+                <h3 id="face-status" data-translate="face_detected">Face Detected Successfully</h3>
+                <p id="analysis-summary" data-translate="analysis_confidence">Analysis completed with high confidence</p>
+              </div>
+            </div>
+
+            {% comment %} Result cards  {% endcomment %}
+            <div class="result-cards">
+              <div class="result-card" id="skin-type-card">
+                <div class="card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </div>
+                <div class="card-content">
+                  <h4 data-translate="skin_type">Skin Type</h4>
+                  <p id="skin-type-value">-</p>
+                  <div class="probability-bars" id="skin-probabilities">
+                    {% comment %} Probability bars will be added here  {% endcomment %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-card" id="eye-colors-card">
+                <div class="card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                  </svg>
+                </div>
+                <div class="card-content">
+                  <h4 data-translate="eye_colors">Eye Colors</h4>
+                  <div class="eye-colors">
+                    <div class="eye-color">
+                      <span class="eye-label" data-translate="left_eye">Left:</span>
+                      <span id="left-eye-color" class="eye-value">-</span>
+                    </div>
+                    <div class="eye-color">
+                      <span class="eye-label" data-translate="right_eye">Right:</span>
+                      <span id="right-eye-color" class="eye-value">-</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-card" id="acne-card">
+                <div class="card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                </div>
+                <div class="card-content">
+                  <h4 data-translate="acne_analysis">Acne Analysis</h4>
+                  <div class="acne-info">
+                    <div class="acne-level">
+                      <span data-translate="level">Level:</span>
+                      <span id="acne-level" class="acne-value">-</span>
+                    </div>
+                    <div class="confidence-meter">
+                      <div class="confidence-bar">
+                        <div id="acne-confidence-fill" class="confidence-fill"></div>
+                      </div>
+                      <span id="acne-confidence" class="confidence-text">-</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-card" id="detections-card">
+                <div class="card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+                  </svg>
+                </div>
+                <div class="card-content">
+                  <h4 data-translate="detected_issues">Detected Issues</h4>
+                  <div id="detected-issues" class="detected-issues">
+                    {% comment %} Issues will be populated here  {% endcomment %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% comment %} Tips Section  {% endcomment %}
+        <div id="tips-section" class="tips-section" style="display:none;">
+          <div class="tips-header">
+            <div class="tips-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" x2="12" y1="1" y2="3"/>
+                <line x1="12" x2="12" y1="21" y2="23"/>
+                <line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/>
+                <line x1="18.36" x2="19.78" y1="18.36" y2="18.36"/>
+                <line x1="1" x2="3" y1="12" y2="12"/>
+                <line x1="21" x2="23" y1="12" y2="12"/>
+                <line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/>
+                <line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/>
+              </svg>
+            </div>
+            <h3 data-translate="personalized_tips">Personalized Tips</h3>
+            <p data-translate="tips_subtitle">Skincare recommendations based on your analysis</p>
+          </div>
+          <div id="tips-content" class="tips-content">
+            {% comment %} Tips will be populated here  {% endcomment %}
+          </div>
+        </div>
+
+        {% comment %} Analysis Images Section  {% endcomment %}
+        <div id="analysis-images" class="analysis-images-section" style="display:none;">
+          <div class="images-header">
+            <h3 data-translate="detailed_analysis">Detailed Analysis</h3>
+            <p data-translate="visual_breakdown">Visual breakdown of detected areas and skin conditions</p>
+          </div>
+          
+          <div class="analysis-images-grid">
+            <div class="analysis-image-card">
+              <div class="image-header">
+                <div class="image-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+                  </svg>
+                </div>
+                <div class="image-title">
+                  <h4 data-translate="issue_detection">Issue Detection</h4>
+                  <p data-translate="areas_highlighted">Areas of concern highlighted</p>
+                </div>
+              </div>
+              <div class="image-container">
+                <img id="yolo-annotated-image" src="/placeholder.svg" alt="YOLO Detection Results" width="300" height="300" style="display: none;" />
+              </div>
+            </div>
+
+            <div class="analysis-image-card">
+              <div class="image-header">
+                <div class="image-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                  </svg>
+                </div>
+                <div class="image-title">
+                  <h4 data-translate="skin_segmentation">Skin Segmentation</h4>
+                  <p data-translate="skin_areas_mapped">Different skin areas mapped</p>
+                </div>
+              </div>
+              <div class="image-container">
+                <img id="segmentation-overlay-image" src="/placeholder.svg" alt="Segmentation Analysis" width="300" height="300" style="display: none;" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% comment %} Product Recommendations Section  {% endcomment %}
+        <div id="product-recommendations" class="product-recommendations-section" style="display:none;">
+          <div class="recommendations-header">
+            <div class="recommendations-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="21" r="1"/>
+                <circle cx="19" cy="21" r="1"/>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L20.42 9H5.12"/>
+              </svg>
+            </div>
+            <h3 data-translate="recommended_products">Recommended Products</h3>
+            <p data-translate="curated_products">Curated skincare products based on your analysis</p>
+          </div>
+          
+          <div class="recommendations-filters">
+            <span class="filter-label" data-translate="filtering_by">Filtering by:</span>
+            <div id="active-filters" class="active-filters"></div>
+          </div>
+          
+          <div id="recommended-products" class="product-grid">
+            {% paginate collections.all.products by 20 %}
+              {% for product in collections.all.products %}
+                <div class="product-item" 
+                    data-tags="{{ product.tags | join: ',' | downcase }}"
+                    data-title="{{ product.title | downcase }}"
+                    style="display: none;">
+                  <div class="product-image">
+                    <img src="{{ product.featured_image | img_url: '200x200' }}" 
+                        alt="{{ product.title }}" 
+                        width="200" 
+                        height="200">
+                  </div>
+                  <div class="product-info">
+                    <h4 class="product-title">{{ product.title }}</h4>
+                    <p class="product-price">{{ product.price | money }}</p>
+                    <div class="product-tags">
+                      {% for tag in product.tags limit: 3 %}
+                        <span class="tag">{{ tag }}</span>
+                      {% endfor %}
+                    </div>
+                    <a href="{{ product.url }}" class="product-link" data-translate="view_product">View Product</a>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endpaginate %}
+          </div>
+          
+          <div id="no-products" class="no-products" style="display: none;">
+            <div class="no-products-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 12h8"/>
+              </svg>
+            </div>
+            <h4 data-translate="no_products_found">No Products Found</h4>
+            <p data-translate="no_products_message">We couldn't find products matching your skin analysis. Check back later for new recommendations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const translations = {
+    en: {
+      title: "Face Analysis Extension",
+      description: "Upload an image to analyze facial features and expressions.",
+      lang_en: "EN",
+      lang_fr: "FR", 
+      lang_ar: "AR",
+      upload_placeholder: "Upload or capture an image",
+      upload_button: "Upload Image",
+      use_camera: "Use Camera",
+      capture_photo: "Capture Photo",
+      stop_camera: "Stop Camera",
+      consent_text: "I agree to the processing of my photo for temporary analysis to receive beauty tips and product recommendations. I understand that my photo will not be stored.",
+      privacy_policy_text: "Read our",
+      privacy_policy_link: "Privacy Policy",
+      privacy_policy_details: "for more details.",
+      analyze_face: "Analyze Face",
+      upload_note: "PNG, JPG, or JPEG up to 10MB",
+      analyzing_title: "Analyzing Your Face",
+      analyzing_subtitle: "Please wait while we process your image...",
+      analysis_complete: "Analysis Complete",
+      analysis_results_subtitle: "Here are your personalized skin analysis results",
+      face_detected: "Face Detected Successfully",
+      analysis_confidence: "Analysis completed with high confidence",
+      skin_type: "Skin Type",
+      eye_colors: "Eye Colors",
+      left_eye: "Left:",
+      right_eye: "Right:",
+      acne_analysis: "Acne Analysis",
+      level: "Level:",
+      detected_issues: "Detected Issues",
+      personalized_tips: "Personalized Tips",
+      tips_subtitle: "Skincare recommendations based on your analysis",
+      detailed_analysis: "Detailed Analysis",
+      visual_breakdown: "Visual breakdown of detected areas and skin conditions",
+      issue_detection: "Issue Detection",
+      areas_highlighted: "Areas of concern highlighted",
+      skin_segmentation: "Skin Segmentation",
+      skin_areas_mapped: "Different skin areas mapped",
+      recommended_products: "Recommended Products",
+      curated_products: "Curated skincare products based on your analysis",
+      filtering_by: "Filtering by:",
+      view_product: "View Product",
+      no_products_found: "No Products Found",
+      no_products_message: "We couldn't find products matching your skin analysis. Check back later for new recommendations.",
+      no_issues_detected: "No skin issues detected"
+    },
+    fr: {
+      title: "Extension d'Analyse Faciale",
+      description: "Téléchargez une image pour analyser les traits et expressions du visage.",
+      lang_en: "EN",
+      lang_fr: "FR",
+      lang_ar: "AR",
+      upload_placeholder: "Télécharger ou capturer une image",
+      upload_button: "Télécharger Image",
+      use_camera: "Utiliser Caméra",
+      capture_photo: "Capturer Photo",
+      stop_camera: "Arrêter Caméra",
+      consent_text: "J'accepte le traitement de ma photo pour une analyse temporaire afin de recevoir des conseils beauté et des recommandations de produits. Je comprends que ma photo ne sera pas stockée.",
+      privacy_policy_text: "Lisez notre",
+      privacy_policy_link: "Politique de Confidentialité",
+      privacy_policy_details: "pour plus de détails.",
+      analyze_face: "Analyser Visage",
+      upload_note: "PNG, JPG, ou JPEG jusqu'à 10MB",
+      analyzing_title: "Analyse de Votre Visage",
+      analyzing_subtitle: "Veuillez patienter pendant que nous traitons votre image...",
+      analysis_complete: "Analyse Terminée",
+      analysis_results_subtitle: "Voici vos résultats d'analyse de peau personnalisés",
+      face_detected: "Visage Détecté avec Succès",
+      analysis_confidence: "Analyse terminée avec une grande confiance",
+      skin_type: "Type de Peau",
+      eye_colors: "Couleurs des Yeux",
+      left_eye: "Gauche:",
+      right_eye: "Droite:",
+      acne_analysis: "Analyse d'Acné",
+      level: "Niveau:",
+      detected_issues: "Problèmes Détectés",
+      personalized_tips: "Conseils Personnalisés",
+      tips_subtitle: "Recommandations de soins de la peau basées sur votre analyse",
+      detailed_analysis: "Analyse Détaillée",
+      visual_breakdown: "Répartition visuelle des zones détectées et des conditions de peau",
+      issue_detection: "Détection de Problèmes",
+      areas_highlighted: "Zones préoccupantes mises en évidence",
+      skin_segmentation: "Segmentation de la Peau",
+      skin_areas_mapped: "Différentes zones de peau cartographiées",
+      recommended_products: "Produits Recommandés",
+      curated_products: "Produits de soins de la peau sélectionnés basés sur votre analyse",
+      filtering_by: "Filtrage par:",
+      view_product: "Voir Produit",
+      no_products_found: "Aucun Produit Trouvé",
+      no_products_message: "Nous n'avons pas pu trouver de produits correspondant à votre analyse de peau. Revenez plus tard pour de nouvelles recommandations.",
+      no_issues_detected: "Aucun problème de peau détecté"
+    },
+    ar: {
+      title: "امتداد تحليل الوجه",
+      description: "قم بتحميل صورة لتحليل ملامح الوجه والتعبيرات.",
+      lang_en: "EN",
+      lang_fr: "FR",
+      lang_ar: "AR",
+      upload_placeholder: "تحميل أو التقاط صورة",
+      upload_button: "تحميل صورة",
+      use_camera: "استخدام الكاميرا",
+      capture_photo: "التقاط صورة",
+      stop_camera: "إيقاف الكاميرا",
+      consent_text: "أوافق على معالجة صورتي للتحليل المؤقت لتلقي نصائح الجمال وتوصيات المنتجات. أفهم أن صورتي لن يتم تخزينها.",
+      privacy_policy_text: "اقرأ",
+      privacy_policy_link: "سياسة الخصوصية",
+      privacy_policy_details: "لمزيد من التفاصيل.",
+      analyze_face: "تحليل الوجه",
+      upload_note: "PNG أو JPG أو JPEG حتى 10 ميجابايت",
+      analyzing_title: "تحليل وجهك",
+      analyzing_subtitle: "يرجى الانتظار بينما نعالج صورتك...",
+      analysis_complete: "اكتمل التحليل",
+      analysis_results_subtitle: "إليك نتائج تحليل بشرتك الشخصية",
+      face_detected: "تم اكتشاف الوجه بنجاح",
+      analysis_confidence: "اكتمل التحليل بثقة عالية",
+      skin_type: "نوع البشرة",
+      eye_colors: "ألوان العيون",
+      left_eye: "اليسار:",
+      right_eye: "اليمين:",
+      acne_analysis: "تحليل حب الشباب",
+      level: "المستوى:",
+      detected_issues: "المشاكل المكتشفة",
+      personalized_tips: "نصائح شخصية",
+      tips_subtitle: "توصيات العناية بالبشرة بناءً على تحليلك",
+      detailed_analysis: "تحليل مفصل",
+      visual_breakdown: "تفصيل بصري للمناطق المكتشفة وحالات البشرة",
+      issue_detection: "اكتشاف المشاكل",
+      areas_highlighted: "المناطق المثيرة للقلق مميزة",
+      skin_segmentation: "تقسيم البشرة",
+      skin_areas_mapped: "مناطق البشرة المختلفة مرسومة",
+      recommended_products: "المنتجات الموصى بها",
+      curated_products: "منتجات العناية بالبشرة المنتقاة بناءً على تحليلك",
+      filtering_by: "التصفية حسب:",
+      view_product: "عرض المنتج",
+      no_products_found: "لم يتم العثور على منتجات",
+      no_products_message: "لم نتمكن من العثور على منتجات تتطابق مع تحليل بشرتك. تحقق مرة أخرى لاحقاً للحصول على توصيات جديدة.",
+      no_issues_detected: "لم يتم اكتشاف مشاكل في البشرة"
+    }
+  };
+
+let currentLanguage = 'en';
+let lastAnalysisData = null;
+
+function translatePage(language) {
+  currentLanguage = language;
+
+  // Translate all elements with [data-translate]
+  const elements = document.querySelectorAll('[data-translate]');
+  elements.forEach(element => {
+    const key = element.getAttribute('data-translate');
+    if (translations[language] && translations[language][key]) {
+      element.textContent = translations[language][key];
+    }
+  });
+
+  // Update direction only on the app container, not the entire document
+  const appContainer = document.querySelector('.my-app-container');
+  if (appContainer) {
+    appContainer.dir = language === 'ar' ? 'rtl' : 'ltr';
+  }
+  
+  // Keep lang attribute on document for accessibility/SEO
+  document.documentElement.lang = language;
+
+  // Save preference
+  localStorage.setItem('preferredLanguage', language);
+
+  // Regenerate tips if analysis data exists
+  if (lastAnalysisData && typeof regenerateTipsForLanguage === 'function') {
+    const newTips = regenerateTipsForLanguage(lastAnalysisData, language);
+    if (typeof displayTips === 'function') {
+      displayTips(newTips);
+    }
+  }
+}
+
+
+// Initialize language on page load
+document.addEventListener('DOMContentLoaded', function () {
+  // Get saved language or default to English
+  const storedLanguage = localStorage.getItem('preferredLanguage') || 'en';
+
+  // Mark the active button
+  document.querySelectorAll('.lang-selector-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.lang === storedLanguage) {
+      btn.classList.add('active');
+    }
+  });
+
+  // Translate page
+  translatePage(storedLanguage);
+
+  // Language selector button logic
+  const langBtns = document.querySelectorAll('.lang-selector-btn');
+  langBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      langBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      translatePage(btn.dataset.lang);
+    });
+  });
+});
+
+
+    const input = document.getElementById('picture');
+    const preview = document.getElementById('preview-image');
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const consentCheckbox = document.getElementById('consent');
+    const resultsSection = document.getElementById('results-section');
+    const analysisImages = document.getElementById('analysis-images');
+    const yoloImage = document.getElementById('yolo-annotated-image');
+    const segmentationImage = document.getElementById('segmentation-overlay-image');
+    const productRecommendations = document.getElementById('product-recommendations');
+    const activeFiltersDiv = document.getElementById('active-filters');
+    const productItems = document.querySelectorAll('.product-item');
+    const noProductsDiv = document.getElementById('no-products');
+    const loadingSection = document.getElementById('loading-section');
+    
+    const webcamBtn = document.getElementById('webcam-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const stopCameraBtn = document.getElementById('stop-camera-btn');
+    const webcamSection = document.getElementById('webcam-section');
+    const webcamVideo = document.getElementById('webcam-video');
+    const webcamCanvas = document.getElementById('webcam-canvas');
+    const tipsSection = document.getElementById('tips-section');
+    const tipsContent = document.getElementById('tips-content');
+    let webcamStream = null;
+    let uploadedFile = null;
+
+    function updateAnalyzeButton() {
+      const hasFile = uploadedFile !== null;
+      const hasConsent = consentCheckbox.checked;
+      analyzeBtn.disabled = !(hasFile && hasConsent);
+    }
+
+    consentCheckbox.addEventListener('change', function() {
+      updateAnalyzeButton();
+    });
+
+    input.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        previewPlaceholder.style.display = 'none';
+        uploadedFile = file;
+        updateAnalyzeButton();
+        hideResults();
+        hideWebcam();
+      }
+    });
+
+    webcamBtn.addEventListener('click', function() {
+      startWebcam();
+    });
+
+    captureBtn.addEventListener('click', function() {
+      capturePhoto();
+    });
+
+    stopCameraBtn.addEventListener('click', function() {
+      hideWebcam();
+    });
+
+    function startWebcam() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          webcamStream = stream;
+          webcamVideo.srcObject = stream;
+          webcamSection.style.display = 'block';
+          captureBtn.style.display = 'inline-flex';
+          stopCameraBtn.style.display = 'inline-flex';
+          webcamBtn.style.display = 'none';
+        })
+        .catch(function(err) {
+          console.error('Error accessing camera:', err);
+        });
+    }
+
+    function capturePhoto() {
+      const context = webcamCanvas.getContext('2d');
+      context.drawImage(webcamVideo, 0, 0, 256, 256);
+      
+      webcamCanvas.toBlob(function(blob) {
+        uploadedFile = new File([blob], 'webcam-photo.jpg', { type: 'image/jpeg' });
+        preview.src = URL.createObjectURL(blob);
+        preview.style.display = 'block';
+        previewPlaceholder.style.display = 'none';
+        updateAnalyzeButton();
+        hideResults();
+        hideWebcam();
+      }, 'image/jpeg', 0.8);
+    }
+
+    function hideWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(track => track.stop());
+        webcamStream = null;
+      }
+      webcamSection.style.display = 'none';
+      captureBtn.style.display = 'none';
+      stopCameraBtn.style.display = 'none';
+      webcamBtn.style.display = 'inline-flex';
+    }
+
+    function hideResults() {
+      resultsSection.style.display = 'none';
+      analysisImages.style.display = 'none';
+      productRecommendations.style.display = 'none';
+      tipsSection.style.display = 'none';
+      loadingSection.style.display = 'none';
+    }
+
+    analyzeBtn.addEventListener('click', function () {
+      if (!uploadedFile || !consentCheckbox.checked) {
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('photo', uploadedFile);
+
+      hideResults();
+      loadingSection.style.display = 'block';
+      analyzeBtn.disabled = true;
+      analyzeBtn.querySelector('.button-text').textContent = translations[currentLanguage].analyzing_title || 'Analyzing...';
+      
+      const apiEndpoint = '{{ block.settings.api_endpoint | default: "https://beautyai.duckdns.org/upload/" }}';
+      
+      fetch(apiEndpoint, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      .then(response => {
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          return response.text().then(text => {
+            throw new Error(`Server returned ${contentType || 'unknown content type'} instead of JSON`);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        loadingSection.style.display = 'none';
+        updateAnalyzeButton();
+        analyzeBtn.querySelector('.button-text').textContent = translations[currentLanguage].analyze_face || 'Analyze Face';
+        
+        if (data.error) {
+          console.error('API Error:', data.error);
+        } else {
+          displayResults(data);
+        }
+      })
+      .catch(err => {
+        loadingSection.style.display = 'none';
+        updateAnalyzeButton();
+        analyzeBtn.querySelector('.button-text').textContent = translations[currentLanguage].analyze_face || 'Analyze Face';
+        console.error('Analysis failed:', err);
+      });
+    });
+
+    function displayResults(data) {
+      lastAnalysisData = data;
+      
+      const issuesContainer = document.getElementById('detected-issues');
+      issuesContainer.innerHTML = '';
+      
+      // Show analyzed face
+      if (data.cropped_face) {
+        document.getElementById('analyzed-face').src = data.cropped_face;
+      }
+
+      // Display skin type
+      if (data.skin_type) {
+        document.getElementById('skin-type-value').textContent = data.skin_type;
+        
+        // Display probabilities
+        if (data.type_probs && data.type_probs.length === 3) {
+          const probContainer = document.getElementById('skin-probabilities');
+          const types = ['Dry', 'Normal', 'Oily'];
+          probContainer.innerHTML = types.map((type, index) => `
+            <div class="probability-bar">
+              <div class="prob-label">
+                <span>${type}</span>
+                <span>${(data.type_probs[index] * 100).toFixed(1)}%</span>
+              </div>
+              <div class="prob-track">
+                <div class="prob-fill" style="width: ${data.type_probs[index] * 100}%"></div>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // Display eye colors
+      if (data.left_eye_color) {
+        document.getElementById('left-eye-color').textContent = data.left_eye_color;
+      }
+      if (data.right_eye_color) {
+        document.getElementById('right-eye-color').textContent = data.right_eye_color;
+      }
+
+      // Display acne information
+      if (data.acne_pred && data.acne_confidence) {
+        document.getElementById('acne-level').textContent = data.acne_pred;
+        const confidence = data.acne_confidence * 100;
+        document.getElementById('acne-confidence').textContent = `${confidence.toFixed(1)}%`;
+        document.getElementById('acne-confidence-fill').style.width = `${confidence}%`;
+      }
+
+      const allDetectedIssues = {};
+
+      // Process YOLO detection results
+      if (data.yolo_boxes && data.yolo_boxes.length > 0) {
+        data.yolo_boxes.forEach(box => {
+          const issueType = box.label || box.class || 'Unknown';
+          if (allDetectedIssues[issueType]) {
+            allDetectedIssues[issueType].count++;
+            allDetectedIssues[issueType].maxConfidence = Math.max(allDetectedIssues[issueType].maxConfidence, box.confidence || 0);
+          } else {
+            allDetectedIssues[issueType] = {
+              count: 1,
+              maxConfidence: box.confidence || 0
+            };
+          }
+        });
+      }
+
+      if (data.segmentation_results) {
+        let segmentationIssues = [];
+        
+        if (Array.isArray(data.segmentation_results)) {
+          segmentationIssues = data.segmentation_results
+            .map(result => {
+              if (typeof result === 'string') {
+                return result;
+              } else if (result && typeof result === 'object') {
+                return result.class || result.label || result.name || '';
+              }
+              return '';
+            })
+            .filter(issue => issue.length > 0);
+        } else if (typeof data.segmentation_results === 'object') {
+          segmentationIssues = Object.entries(data.segmentation_results)
+            .filter(([key, value]) => Boolean(value))
+            .map(([key, value]) => key);
+        }
+
+        segmentationIssues.forEach(issue => {
+          if (allDetectedIssues[issue]) {
+            allDetectedIssues[issue].count++;
+          } else {
+            allDetectedIssues[issue] = {
+              count: 1,
+              maxConfidence: 0.8
+            };
+          }
+        });
+      }
+
+      if (Object.keys(allDetectedIssues).length > 0) {
+        issuesContainer.innerHTML = Object.entries(allDetectedIssues).map(([issue, data]) => `
+          <div class="issue-item">
+            <div class="issue-info">
+              <span class="issue-name">${issue}</span>
+              <span class="issue-count">${data.count} area${data.count > 1 ? 's' : ''}</span>
+            </div>
+            <div class="issue-confidence">
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width: ${data.maxConfidence * 100}%"></div>
+              </div>
+              <span class="confidence-text">${(data.maxConfidence * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        issuesContainer.innerHTML = `
+          <div class="no-issues-message">
+            <div class="no-issues-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 12l2 2 4-4"/>
+                <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1"/>
+              </svg>
+            </div>
+            <span class="no-issues-text">${translations[currentLanguage].no_issues_detected || 'No skin issues detected'}</span>
+          </div>
+        `;
+      }
+
+      // Display analysis images
+      if (data.yolo_annotated) {
+        yoloImage.src = data.yolo_annotated;
+        yoloImage.style.display = 'block';
+      }
+
+      if (data.segmentation_overlay) {
+        segmentationImage.src = data.segmentation_overlay;
+        segmentationImage.style.display = 'block';
+      }
+
+      if (data.yolo_annotated || data.segmentation_overlay) {
+        analysisImages.style.display = 'block';
+      }
+
+      // Generate tips using the client-side generateTips function
+      if (typeof generateTips === 'function') {
+        const clientTips = generateTips(data);
+        displayTips(clientTips);
+      } else {
+        console.warn('generateTips function not available - tips.js may not be loaded');
+        if (data.tips && data.tips.length > 0) {
+          displayTips(data.tips);
+        }
+      }
+      
+      showProductRecommendations(data);
+      resultsSection.style.display = 'block';
+    }
+
+    function showProductRecommendations(analysisData) {
+      const filters = [];
+      
+      if (analysisData.skin_type) {
+        filters.push(analysisData.skin_type.toLowerCase());
+      }
+      
+      if (analysisData.yolo_boxes && analysisData.yolo_boxes.length > 0) {
+        const detectedIssues = [...new Set(analysisData.yolo_boxes.map(box => 
+          (box.label || box.class || '').toLowerCase()
+        ))];
+        filters.push(...detectedIssues);
+      }
+      
+      if (analysisData.segmentation_results && Array.isArray(analysisData.segmentation_results)) {
+        const segmentationIssues = analysisData.segmentation_results
+          .map(result => {
+            if (typeof result === 'string') {
+              return result.toLowerCase();
+            } else if (result && typeof result === 'object') {
+              return (result.class || result.label || result.name || '').toString().toLowerCase();
+            }
+            return '';
+          })
+          .filter(issue => issue.length > 0);
+        filters.push(...segmentationIssues);
+      }
+      
+      if (analysisData.acne_pred && parseInt(analysisData.acne_pred) > 0) {
+        filters.push('acne');
+      }
+      
+      const uniqueFilters = [...new Set(filters)];
+      
+      activeFiltersDiv.innerHTML = uniqueFilters.map(filter => 
+        `<span class="filter-tag">${filter}</span>`
+      ).join('');
+      
+      let visibleCount = 0;
+      productItems.forEach(item => {
+        const productTags = item.dataset.tags.toLowerCase();
+        const productTitle = item.dataset.title.toLowerCase();
+        const isRelevant = uniqueFilters.some(filter => 
+          productTags.includes(filter) || productTitle.includes(filter)
+        );
+        
+        if (isRelevant) {
+          item.style.display = 'block';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      if (visibleCount === 0) {
+        noProductsDiv.style.display = 'block';
+      } else {
+        noProductsDiv.style.display = 'none';
+      }
+      
+      productRecommendations.style.display = 'block';
+    }
+
+    function displayTips(tips) {
+      if (tips && tips.length > 0) {
+        tipsContent.innerHTML = tips.map(tip => 
+          `<div class="tip-item">
+            <div class="tip-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" x2="12" y1="1" y2="3"/>
+                <line x1="12" x2="12" y1="21" y2="23"/>
+                <line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/>
+                <line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/>
+                <line x1="1" x2="3" y1="12" y2="12"/>
+                <line x1="21" x2="23" y1="12" y2="12"/>
+                <line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/>
+                <line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/>
+              </svg>
+            </div>
+            <div class="tip-text">${tip}</div>
+          </div>`
+        ).join('');
+        
+        tipsSection.style.display = 'block';
+      } else {
+        tipsSection.style.display = 'none';
+      }
+    }
+</script>
+
+{% schema %}
+{
+  "name": "Face Analysis Block",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Block Title",
+      "default": "Face Analysis Extension"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Description",
+      "default": "Upload an image to analyze facial features and expressions."
+    },
+    {
+      "type": "text",
+      "id": "api_endpoint",
+      "label": "API Endpoint URL",
+      "default": "https://beautyai.duckdns.org/upload/",
+      "info": "Full URL to your Django API endpoint (e.g., https://beautyai.duckdns.org/upload/ or https://yourdomain.com/upload/)"
+    }
+  ]
+}
+{% endschema %}

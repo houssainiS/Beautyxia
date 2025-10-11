@@ -1,0 +1,20 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "3133ce1109da82b7eeb18dfd968d1477"
+name = "Beautyxia"
+application_url = "https://beautyai.duckdns.org/app_entry/"
+embedded = true
+handle = "beautyxia"
+
+[build]
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2025-07"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_online_store_navigation,read_online_store_pages,read_orders,read_products,read_themes,write_content,write_online_store_navigation,write_online_store_pages,write_orders,write_products,write_themes"
+
+[auth]
+redirect_urls = [ "https://beautyai.duckdns.org/auth/callback/" ]
