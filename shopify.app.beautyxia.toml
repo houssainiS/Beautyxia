@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "3133ce1109da82b7eeb18dfd968d1477"
+client_id = "f34709fcc6c0194a0b9995356239dd9b"
 name = "Beautyxia"
 application_url = "https://beautyai.duckdns.org/app_entry/"
 embedded = true
