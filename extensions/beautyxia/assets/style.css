@@ -1258,62 +1258,170 @@
   text-decoration: none;
 }
 
-/* Enhanced product item animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Feedback Section Styling */
+.feedback-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
 }
 
-/* Mobile responsive adjustments */
+.feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.feedback-heart-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.feedback-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #202223;
+  margin: 0;
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.btn-feedback-positive,
+.btn-feedback-negative {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #e1e3e5;
+  background-color: #ffffff;
+  color: #202223;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.btn-feedback-positive:hover:not(:disabled) {
+  background-color: #f0fdf4;
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.btn-feedback-positive svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-feedback-negative:hover:not(:disabled) {
+  background-color: #fef2f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.btn-feedback-negative svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-feedback-positive:disabled,
+.btn-feedback-negative:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dislike-feedback-area {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f6f6f7;
+  border-radius: 8px;
+}
+
+.dislike-feedback-area p {
+  font-size: 14px;
+  color: #202223;
+  margin: 0 0 12px 0;
+  font-weight: 500;
+}
+
+.dislike-feedback-area textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #c9cccf;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  resize: vertical;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.dislike-feedback-area textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-submit-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #202223;
+  color: #ffffff;
+  border: 1px solid #202223;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.btn-submit-feedback:hover {
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.btn-submit-feedback svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.feedback-message {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Mobile responsive adjustments for feedback */
 @media (max-width: 640px) {
-  .face-analysis-container {
-    padding: 16px;
-    background-color: #ffffff;
+  .feedback-buttons {
+    flex-direction: column;
   }
 
-  .face-analysis-card {
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-  }
-
-  .face-analysis-header {
-    padding: 16px;
-  }
-
-  .face-analysis-body {
-    padding: 16px;
-  }
-
-  .face-analysis-preview {
-    height: 160px;
-  }
-
-  .gdpr-consent-section {
-    padding: 12px;
-    margin: 12px 0;
-  }
-
-  .consent-checkbox label {
-    font-size: 13px;
-  }
-
-  .privacy-policy-link {
-    font-size: 12px;
-  }
-
-  .tip-item {
-    padding: 12px;
-  }
-
-  .tip-text {
-    font-size: 13px;
+  .btn-feedback-positive,
+  .btn-feedback-negative {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -1330,4 +1438,16 @@
 .hidden-file:focus + .upload-button {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
+}
+
+/* Enhanced product item animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
