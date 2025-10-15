@@ -34,7 +34,7 @@
             </div>
             <img 
               id="preview-image"
-              src="/placeholder.svg" 
+              src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder.svg?v=1610059410"
               alt="Uploaded Image Preview" 
               width="256"
               height="256" 
@@ -138,7 +138,8 @@
             <div class="analysis-results">
               <div class="face-display">
                 <div class="face-frame">
-                  <img id="analyzed-face" src="/placeholder.svg" alt="Analyzed Face" width="80" height="80">
+                  <img id="analyzed-face" src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder.svg?v=1610059410"
+                  alt="Analyzed Face" width="80" height="80">
                   <div class="face-badge">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M9 12l2 2 4-4"/>
@@ -278,7 +279,8 @@
                   </div>
                 </div>
                 <div class="image-container">
-                  <img id="yolo-annotated-image" src="/placeholder.svg" alt="YOLO Detection Results" width="300" height="300" style="display: none;" />
+                  <img id="yolo-annotated-image" src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder.svg?v=1610059410"
+                   alt="YOLO Detection Results" width="300" height="300" style="display: none;" />
                 </div>
               </div>
 
@@ -296,7 +298,8 @@
                   </div>
                 </div>
                 <div class="image-container">
-                  <img id="segmentation-overlay-image" src="/placeholder.svg" alt="Segmentation Analysis" width="300" height="300" style="display: none;" />
+                  <img id="segmentation-overlay-image" src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder.svg?v=1610059410"
+                   alt="Segmentation Analysis" width="300" height="300" style="display: none;" />
                 </div>
               </div>
             </div>
@@ -354,7 +357,7 @@
                       data-title="{{ product.title | downcase }}"
                       style="display: none;">
                     <div class="product-image">
-                      <img src="{{ product.featured_image | img_url: '200x200' }}" 
+                      <img src="{{ product.featured_image | image_url: width: 200, height: 200 }}" 
                           alt="{{ product.title }}" 
                           width="200" 
                           height="200">
