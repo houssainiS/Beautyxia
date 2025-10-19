@@ -302,7 +302,7 @@
             </div>
           </div>
 
-          {% comment %} <CHANGE> Moved Feedback Section here - after Analysis Images and before Product Recommendations {% endcomment %}
+          {% comment %} Feedback Section - after Analysis Images and before Product Recommendations {% endcomment %}
           <div class="feedback-section" id="feedbackSection" style="display:none;">
             <div class="feedback-header">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -441,7 +441,8 @@
         feedback_helpful: "Helpful",
         feedback_not_helpful: "Not Helpful",
         feedback_thank_you: "Thank you for your feedback!",
-        feedback_submitted: "Your feedback has been submitted successfully."
+        feedback_submitted: "Your feedback has been submitted successfully.",
+        feedback_error: "Failed to submit feedback. Please try again."
       },
       fr: {
         title: "Analyse Faciale",
@@ -492,7 +493,8 @@
         feedback_helpful: "Utile",
         feedback_not_helpful: "Pas Utile",
         feedback_thank_you: "Merci pour votre retour!",
-        feedback_submitted: "Votre commentaire a été soumis avec succès."
+        feedback_submitted: "Votre commentaire a été soumis avec succès.",
+        feedback_error: "Échec de l'envoi des commentaires. Veuillez réessayer."
       },
       ar: {
         title: "تحليل الوجه",
@@ -543,7 +545,8 @@
         feedback_helpful: "مفيد",
         feedback_not_helpful: "غير مفيد",
         feedback_thank_you: "شكراً لك على ملاحظاتك!",
-        feedback_submitted: "تم إرسال ملاحظاتك بنجاح."
+        feedback_submitted: "تم إرسال ملاحظاتك بنجاح.",
+        feedback_error: "فشل إرسال الملاحظات. يرجى المحاولة مرة أخرى."
       }
     };
 
@@ -723,7 +726,7 @@
         productRecommendations.style.display = 'none';
         tipsSection.style.display = 'none';
         loadingSection.style.display = 'none';
-        // <CHANGE> Hide feedback section when hiding results
+        // Hide feedback section when hiding results
         const feedbackSection = document.getElementById('feedbackSection');
         if (feedbackSection) {
           feedbackSection.style.display = 'none';
@@ -935,7 +938,7 @@
         showProductRecommendations(data);
         resultsSection.style.display = 'block';
         
-        // <CHANGE> Show feedback section after results are displayed
+        // Show feedback section after results are displayed
         const feedbackSection = document.getElementById('feedbackSection');
         if (feedbackSection) {
           feedbackSection.style.display = 'block';
@@ -1033,25 +1036,58 @@
         }
       }
 
-      // <CHANGE> Updated feedback handling - removed textarea functionality, submit empty feedback on dislike
+      // <CHANGE> Added actual backend submission for feedback
       function initializeFeedbackHandlers() {
         const likeBtn = document.getElementById('likeBtn');
         const dislikeBtn = document.getElementById('dislikeBtn');
 
         if (likeBtn) {
           likeBtn.addEventListener('click', function() {
-            showFeedbackMessage(translations[currentLanguage].feedback_thank_you, 'success');
-            disableFeedbackButtons();
+            submitFeedback('like', '');
           });
         }
 
         if (dislikeBtn) {
           dislikeBtn.addEventListener('click', function() {
-            // <CHANGE> Directly submit empty feedback without showing textarea
-            showFeedbackMessage(translations[currentLanguage].feedback_submitted, 'success');
-            disableFeedbackButtons();
+            submitFeedback('dislike', 'empty');
           });
         }
+      }
+
+      // <CHANGE> New function to submit feedback to Django backend
+      function submitFeedback(feedbackType, dislikeReason = '') {
+        const feedbackEndpoint = 'https://beautyai.duckdns.org/submit-feedback/';
+        
+        const payload = {
+          feedback_type: feedbackType,
+          dislike_reason: dislikeReason
+        };
+
+        console.log('[v0] Submitting feedback:', payload);
+
+        fetch(feedbackEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          credentials: 'include',
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('[v0] Feedback response:', data);
+          showFeedbackMessage(translations[currentLanguage].feedback_thank_you, 'success');
+          disableFeedbackButtons();
+        })
+        .catch(error => {
+          console.error('[v0] Feedback submission error:', error);
+          showFeedbackMessage(translations[currentLanguage].feedback_error, 'error');
+        });
       }
 
       function showFeedbackMessage(message, type) {
